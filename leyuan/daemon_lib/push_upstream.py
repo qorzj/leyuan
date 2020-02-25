@@ -1,5 +1,4 @@
 from typing import List
-import sys
 import json
 import requests
 import re
@@ -7,13 +6,20 @@ import docker
 from docker.models.containers import Container
 
 
+def is_ly_name(name: str):
+    if name.count('-') < 3:  # format JOB_STAGE-GROUP-APP_NAME-INDEX only
+        return False
+    segs = name.split('-')
+    return segs[0] in ['alhpa', 'beta', 'stage', 'app'] \
+           and re.match('[0-9]+', segs[-1]) is not None
+
+
 def get_map_of_docker(containers: List[Container]):
     ret = {}
     for container in containers:
         name = container.name.strip('/')  # type: str
-        name = re.sub('[-_][0-9]+$', '', name)  # multiple local container
         port80 = port8080 = port = 0  # type: int
-        if name.count('-') < 2:  # format JOB_STAGE-GROUP-APP_NAME only
+        if not is_ly_name(name):  # ly name pattern only
             continue
         for inner_port, outer_ports in container.ports.items():
             if not outer_ports:
@@ -52,6 +58,11 @@ def register(name, port, tags):
         "Weights": {
             "Passing": 10,
             "Warning": 1
+        },
+        "check": {
+            "tcp": "localhost:%d" % port,
+            "interval": "10s",
+            "timeout": "1s"
         }
     }
     url = 'http://127.0.0.1:8500/v1/agent/service/register'
