@@ -46,7 +46,7 @@ setup(
             ],
         keywords='lesscli',
         packages = ['leyuan'],
-        install_requires=['lesscli'],
+        install_requires=['lesscli', 'requests', 'docker'],
 
         cmdclass={'install': MyInstall},
         entry_points={

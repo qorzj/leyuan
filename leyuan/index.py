@@ -1,6 +1,6 @@
 """
 ly::init::server  // consul, mqtt ly init server
-ly::init::client  // consul ly init client
+ly::init::docker_client  // consul ly init docker_client
 ly::daemon  // push, pull, upstream ly daemon
 ly::cli::block  // ly block --shard=?
 ly::cli::exec  // ly exec --shard=? --cmd=? --barrier=? --timeout=180
