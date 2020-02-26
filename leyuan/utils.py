@@ -3,8 +3,7 @@ import os
 
 def exe(cmd: str):
     print(cmd)
-    # ret = os.system(cmd)
-    ret = 0
+    ret = os.system(cmd)
     return ret == 0
 
 
