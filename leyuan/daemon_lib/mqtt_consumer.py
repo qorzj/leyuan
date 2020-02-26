@@ -31,7 +31,9 @@ def on_message(client, userdata, msg):
         print('==== docker/exec received')
         print('==== payload:', payload)
         node_names, cmd = payload.split('|||', 1)
-        print('====', client.client_id, node_names)
+        print('====', node_names)
+        print('====', client)
+        print('====', client.client_id)
         print('====', client.client_id, node_names.split(','))
         if client.client_id in node_names.split(','):
             print('execute:', cmd)
