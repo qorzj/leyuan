@@ -47,10 +47,10 @@ def do_init_client(join_ip: str=''):
     assert_exe('mkdir -p /opt/consul/data')
     assert_exe('mkdir -p /etc/consul.d')
     assert_exe(
-        'nohup consul agent'
-        '  -bind=\'{{ GetInterfaceIP "eth0" }}\' '
-        f'  -join={join_ip} '
-        '  -data-dir=/opt/consul/data '
+        'nohup consul agent' +
+        '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
+        f'  -join={join_ip} ' +
+        '  -data-dir=/opt/consul/data ' +
         '  -config-dir=/etc/consul.d &'
     )
 
