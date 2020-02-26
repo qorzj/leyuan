@@ -61,5 +61,6 @@ def run():
     client.on_connect = on_connect
     client.on_message = on_message
     client.on_disconnect = on_disconnect
+    connect()
     threading.Thread(target=reconnect).start()
     client.loop_forever()
