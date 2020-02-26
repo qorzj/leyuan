@@ -52,8 +52,9 @@ def do_pull_upstream_once():
                     f.write('    server  %s;\n' % item)
                 f.write('}\n')
 
+        os.system('%s -s reload' % NGINX_BIN)
+
     if new_block_dict != block_dict:
         with open(block_filename, 'w') as f:
             f.write(json.dumps(new_block_dict))
 
-        os.system('%s -s reload' % NGINX_BIN)
