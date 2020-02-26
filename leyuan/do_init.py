@@ -21,12 +21,12 @@ def do_init_server(server_count: int=1, join_ip: str='', is_first: str='x'):
     assert_exe('mkdir -p /opt/consul/data')
     assert_exe('mkdir -p /etc/consul.d')
     assert_exe(
-        'nohup consul agent' 
-        '  -server ' 
-        f'  -bootstrap-expect={server_count} '
-        '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' 
-        f'  -join={join_ip} ' if join_ip else '' 
-        '  -data-dir=/opt/consul/data '
+        'nohup consul agent' +
+        '  -server ' +
+        f'  -bootstrap-expect={server_count} ' +
+        '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
+        f'  -join={join_ip} ' if join_ip else '' +
+        '  -data-dir=/opt/consul/data ' +
         '  -config-dir=/etc/consul.d &'
     )
 
