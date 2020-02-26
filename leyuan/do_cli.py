@@ -11,8 +11,10 @@ def pub_block_message(client_id, service_name, node_names: str):
     emqx_ip = get_leader_emqx()
     print('get leader emqx_ip: ' + emqx_ip)
     assert emqx_ip, emqx_ip
+    client.connect(emqx_ip, 1883, 60)
     payload = f'{service_name}|||{node_names}'
-    client.publish('nginx/block', payload, qos=2)
+    ret = client.publish('nginx/block', payload, qos=2)
+    print(ret)
 
 
 def pub_exec_message(client_id, node_names: str, cmd: str):
@@ -20,11 +22,13 @@ def pub_exec_message(client_id, node_names: str, cmd: str):
     emqx_ip = get_leader_emqx()
     print('get leader emqx_ip: ' + emqx_ip)
     assert emqx_ip, emqx_ip
+    client.connect(emqx_ip, 1883, 60)
     payload = f'{node_names}|||{cmd}'
-    client.publish('docker/exec', payload, qos=2)
+    ret = client.publish('docker/exec', payload, qos=2)
+    print(ret)
 
 
-def do_block(service: str, nodes: str):
+def do_block(*, service: str, nodes: str):
     """
     使nginx屏蔽即将下线的服务
     --service=?    服务名称
@@ -36,7 +40,7 @@ def do_block(service: str, nodes: str):
     pub_block_message(client_id, service, nodes)
 
 
-def do_exec(service: str, nodes: str, cmd: str, barrier: str, timeout: str='180'):
+def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='180'):
     """
     通知nodes节点执行命令
     --service=?     服务名称
