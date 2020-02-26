@@ -21,7 +21,7 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     print(msg.topic+" "+str(msg.payload))
-    payload = str(msg.payload)
+    payload = msg.payload.decode()
     if msg.topic == 'nginx/block':
         service_name, node_names = payload.split('|||', 1)
         print('block: ', service_name, node_names)
