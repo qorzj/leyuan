@@ -29,8 +29,10 @@ def on_message(client, userdata, msg):
         do_block_once(service_name, node_names)
     elif msg.topic == 'docker/exec':
         print('==== docker/exec received')
+        print('==== payload:', payload)
         node_names, cmd = payload.split('|||', 1)
-        print('>>', client.client_id, node_names.split(','))
+        print('====', client.client_id, node_names)
+        print('====', client.client_id, node_names.split(','))
         if client.client_id in node_names.split(','):
             print('execute:', cmd)
             do_exec_once(cmd)
