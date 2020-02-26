@@ -75,7 +75,8 @@ def register(name, port, tags):
 
 
 def deregister(name):
-    url = 'http://127.0.0.1:8500/v1/agent/service/deregister/' + name
+    hostname = socket.gethostname()
+    url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{hostname}-{name}'
     requests.put(url)
 
 
