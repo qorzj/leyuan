@@ -26,7 +26,7 @@ def do_pull_upstream_once():
         node_ip = serviceMap['Node']['Address']
         for serviceItem in serviceMap['Services'].values():
             if 'ly' in serviceItem['Tags'] and serviceItem.get('Port'):
-                service_name = serviceItem['ID'].rsplit('-', 1)[0]
+                service_name = serviceItem['Service'].rsplit('-', 1)[0]
                 if f'{service_name}|{node_name}' in block_dict:  # blocked
                     new_block_dict[f'{service_name}|{node_name}'] = 1  # still blocked
                     continue

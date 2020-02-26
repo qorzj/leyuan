@@ -1,5 +1,6 @@
 from typing import List
 import json
+import socket
 import requests
 import re
 import docker
@@ -50,8 +51,9 @@ def get_set_of_consul():
 
 
 def register(name, port, tags):
+    hostname = socket.gethostname()
     data = {
-        "ID": name,
+        "ID": f'{hostname}-{name}',
         "Name": name,
         "Tags": tags,
         "Address": "",
