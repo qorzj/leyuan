@@ -6,14 +6,14 @@ import paho.mqtt.client as mqtt
 from leyuan.consul_lib.catalog import get_leader_emqx
 
 
-def pub_block_message(client_id, service_name, node_names: str):
+def pub_block_message(client_id, title, service_name, node_names: str):
     client = mqtt.Client(client_id=client_id + '-pub')
     emqx_ip = get_leader_emqx()
     print('get leader emqx_ip: ' + emqx_ip)
     assert emqx_ip, emqx_ip
     client.connect(emqx_ip, 1883, 60)
     payload = f'{service_name}|||{node_names}'
-    ret = client.publish('nginx/block', payload, qos=2)
+    ret = client.publish(f'nginx/{title}', payload, qos=2)
     print(ret)
 
 
@@ -37,7 +37,19 @@ def do_block(*, service: str, nodes: str):
     assert service, '服务名称不能为空'
     assert nodes, '节点列表不能为空'
     client_id = socket.gethostname()
-    pub_block_message(client_id, service, nodes)
+    pub_block_message(client_id, 'block', service, nodes)
+
+
+def do_unblock(*, service: str, nodes: str):
+    """
+    使nginx取消屏蔽服务
+    --service=?    服务名称
+    --nodes=?      节点列表（逗号分割）
+    """
+    assert service, '服务名称不能为空'
+    assert nodes, '节点列表不能为空'
+    client_id = socket.gethostname()
+    pub_block_message(client_id, 'unblock', service, nodes)
 
 
 def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='180'):

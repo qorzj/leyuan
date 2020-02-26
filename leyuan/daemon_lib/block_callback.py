@@ -7,7 +7,7 @@ DEST = '/etc/nginx/conf.d'
 NGINX_BIN = 'nginx'
 
 
-def do_block_once(service_name: str, node_names: str):
+def do_block_once(service_name: str, node_names: str, is_block: bool):
     # 注意：不能放到do_pull_upstream_once中，会有逻辑错误
     block_dict: Dict[str, int]  # {`service_name|node_name`: 1}}
     block_filename = DEST + '/block.meta'
@@ -16,7 +16,10 @@ def do_block_once(service_name: str, node_names: str):
     except:
         block_dict = {}
     for node_name in node_names.split(','):
-        block_dict[f'{service_name}|{node_name}'] = 1
+        if is_block:  # 屏蔽
+            block_dict[f'{service_name}|{node_name}'] = 1
+        else:  # 取消屏蔽
+            block_dict.pop(f'{service_name}|{node_name}')
 
     with open(block_filename, 'w') as f:
         f.write(json.dumps(block_dict))

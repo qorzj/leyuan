@@ -14,7 +14,7 @@ client = None
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     if not not_ready('nginx'):
-        client.subscribe("nginx/block", qos=2)
+        client.subscribe("nginx/+", qos=2)
     if not not_ready('docker'):
         client.subscribe("docker/exec", qos=2)
 
@@ -25,7 +25,11 @@ def on_message(client, userdata, msg):
     if msg.topic == 'nginx/block':
         service_name, node_names = payload.split('|||', 1)
         print('block: ', service_name, node_names)
-        do_block_once(service_name, node_names)
+        do_block_once(service_name, node_names, True)
+    elif msg.topic == 'nginx/unblock':
+        service_name, node_names = payload.split('|||', 1)
+        print('unblock: ', service_name, node_names)
+        do_block_once(service_name, node_names, False)
     elif msg.topic == 'docker/exec':
         node_names, cmd = payload.split('|||', 1)
         if socket.gethostname() in node_names.split(','):  # 注意：不能使用client.client_id，否则会莫名退出

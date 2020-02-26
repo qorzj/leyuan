@@ -6,6 +6,7 @@ def main():
     Application('leyuan集群管理工具') \
         .add('init', do_init.app) \
         .add('block', do_cli.do_block) \
+        .add('unblock', do_cli.do_unblock) \
         .add('exec', do_cli.do_exec) \
         .add('daemon', do_daemon.do_daemon) \
         .run()
