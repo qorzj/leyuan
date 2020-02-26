@@ -7,7 +7,7 @@ from leyuan.consul_lib.catalog import get_leader_emqx
 
 
 def pub_block_message(client_id, service_name, node_names: str):
-    client = mqtt.Client(client_id=client_id)
+    client = mqtt.Client(client_id=client_id + '-pub')
     emqx_ip = get_leader_emqx()
     print('get leader emqx_ip: ' + emqx_ip)
     assert emqx_ip, emqx_ip
@@ -18,7 +18,7 @@ def pub_block_message(client_id, service_name, node_names: str):
 
 
 def pub_exec_message(client_id, node_names: str, cmd: str):
-    client = mqtt.Client(client_id=client_id)
+    client = mqtt.Client(client_id=client_id + '-pub')
     emqx_ip = get_leader_emqx()
     print('get leader emqx_ip: ' + emqx_ip)
     assert emqx_ip, emqx_ip
