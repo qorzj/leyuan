@@ -10,34 +10,34 @@ def is_ly_name(name: str):
     if name.count('-') < 3:  # format JOB_STAGE-GROUP-APP_NAME-INDEX only
         return False
     segs = name.split('-')
-    return segs[0] in ['alhpa', 'beta', 'stage', 'app'] \
-           and re.match('[0-9]+', segs[-1]) is not None
+    return re.match('^[0-9]+$', segs[-1]) is not None
 
 
 def get_map_of_docker(containers: List[Container]):
     ret = {}
     for container in containers:
-        name = container.name.strip('/')  # type: str
-        port80 = port8080 = port1883 = port = 0  # type: int
-        if not is_ly_name(name) and name != 'emqx':  # ly name pattern only
-            continue
+        port80 = port8080 = port = 0  # type: int
+        name = container.name  # type: str
+        if is_ly_name(name):
+            tags = ['ly', 'docker']
+            name = name.rsplit('-', 1)[0]
+        elif name == 'emqx':
+            tags = ['emqx', 'docker']
+        else:
+            tags = ['docker']
         for inner_port, outer_ports in container.ports.items():
             if not outer_ports:
                 continue
-            if name == 'emqx' and inner_port == '1883/tcp':
-                port1883 = 1883
             if inner_port == '80/tcp':
                 port80 = int(outer_ports[0]['HostPort'])
             elif inner_port == '8080/tcp':
                 port8080 = int(outer_ports[0]['HostPort'])
             else:
                 port = max(port, int(outer_ports[0]['HostPort']))
-        if port1883:
-            ret[name, port1883] = ['emqx']
-        elif port80 or port8080:
-            ret[name, port80 or port8080] = ['ly', 'docker']
+        if port80 or port8080:
+            ret[name, port80 or port8080] = tags
         elif port:
-            ret[name, port] = ['docker']
+            ret[name, port] = tags
     return ret
 
 
