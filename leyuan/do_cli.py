@@ -61,7 +61,7 @@ def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='1
     while time.time() - start_at < timeout_int:
         time.sleep(3)
         url = 'http://127.0.0.1:8500/v1/agent/health/service/name/' + service
-        healthList = json.loads(requests.get(url).text)
+        healthList = json.loads(requests.get(url).text)  # todo 各个容器对应不同的service名称，因此不对
         total_passing = sum(1 for x in healthList if x['AggregatedStatus'] == 'passing')
         if total_passing >= barrier_int:
             return
