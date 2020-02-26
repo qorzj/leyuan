@@ -32,6 +32,8 @@ def on_message(client, userdata, msg):
         if client.client_id in node_names.split(','):
             print('execute:', cmd)
             do_exec_once(cmd)
+    else:
+        print('unknown topic: [%s]' % msg.topic)
 
 
 def on_disconnect(client, userdata, rc):
