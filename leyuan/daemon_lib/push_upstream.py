@@ -20,7 +20,6 @@ def get_map_of_docker(containers: List[Container]):
         name = container.name  # type: str
         if is_ly_name(name):
             tags = ['ly', 'docker']
-            name = name.rsplit('-', 1)[0]
         elif name == 'emqx':
             tags = ['emqx', 'docker']
         else:
