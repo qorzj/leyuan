@@ -28,7 +28,7 @@ def on_message(client, userdata, msg):
         do_block_once(service_name, node_names)
     elif msg.topic == 'docker/exec':
         node_names, cmd = payload.split('|||', 1)
-        if socket.gethostname() in node_names.split(','):
+        if socket.gethostname() in node_names.split(','):  # 注意：不能使用client.client_id，否则会莫名退出
             print('execute:', cmd)
             do_exec_once(cmd)
     else:
@@ -50,7 +50,7 @@ def connect():
 
 def reconnect():
     global client
-    while not time.sleep(10):
+    while not time.sleep(30):
         if client and not client.is_connected():
             print('no connected, try to re-connect...')
             connect()
