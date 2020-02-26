@@ -45,7 +45,7 @@ setup(
         classifiers=[
             ],
         keywords='lesscli',
-        packages = ['leyuan'],
+        packages = ['leyuan', 'leyuan.consul_lib', 'leyuan.daemon_lib'],
         install_requires=['lesscli', 'requests', 'docker', 'paho-mqtt'],
 
         cmdclass={'install': MyInstall},
