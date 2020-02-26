@@ -72,7 +72,7 @@ def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='1
     start_at = time.time()
     while time.time() - start_at < timeout_int:
         time.sleep(3)
-        url = 'curl http://127.0.0.1:8500/v1/health/checks/' + service
+        url = 'http://127.0.0.1:8500/v1/health/checks/' + service
         healthList = json.loads(requests.get(url).text)
         total_passing = sum(1 for x in healthList if x['Status'] == 'passing')
         if total_passing >= barrier_int:
