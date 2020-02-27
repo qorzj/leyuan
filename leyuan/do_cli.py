@@ -52,20 +52,20 @@ def do_unblock(*, service: str, nodes: str):
     pub_block_message(client_id, 'unblock', service, nodes)
 
 
-def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='180'):
+def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='180'):
     """
     通知nodes节点执行命令
     --service=?     服务名称
     --nodes=?       节点列表（逗号分隔）
     --cmd=?         需要执行的命令
-    --barrier=?     最少多少服务在线后，才成功退出
+    --expect=?      当且仅当多少服务在线后，才成功退出
     --timeout=?     超时未成功退出，则失败（默认:180，单位:秒）
     """
     assert service, '服务名称不能为空'
     assert nodes, '节点列表不能为空'
     assert cmd, '执行命令不能为空'
-    assert barrier, 'barrier不能为空'
-    barrier_int = int(barrier)
+    assert expect, 'expect不能为空'
+    expect_int = int(expect)
     timeout_int = int(timeout)
     client_id = socket.gethostname()
     pub_exec_message(client_id, nodes, cmd)
@@ -75,7 +75,8 @@ def do_exec(*, service: str, nodes: str, cmd: str, barrier: str, timeout: str='1
         url = 'http://127.0.0.1:8500/v1/health/checks/' + service
         healthList = json.loads(requests.get(url).text)
         total_passing = sum(1 for x in healthList if x['Status'] == 'passing')
-        if total_passing >= barrier_int:
+        if total_passing == expect_int:
+            print('succeed in %d seconds.' % int(time.time() - start_at))
             return
     print('timeout exceed!')
     exit(1)
