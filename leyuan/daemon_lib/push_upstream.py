@@ -68,11 +68,14 @@ def register(name, port, tags):
             "Warning": 1
         },
         "check": {
-            "http": "http://localhost:%d" % port,
             "interval": "10s",
             "timeout": "1s"
         }
     }
+    if 'ly' in tags:
+        data['check']['http'] = "http://localhost:%d" % port
+    else:
+        data['check']['tcp'] = "localhost:%d" % port
     print(f'register: {hostname}-{name}')
     url = 'http://127.0.0.1:8500/v1/agent/service/register'
     requests.put(url, json=data)
