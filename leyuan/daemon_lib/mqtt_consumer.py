@@ -54,6 +54,8 @@ def run():
         if cur_emqx_ip != emqx_ip:
             print('get leader emqx_ip: ' + emqx_ip)
             try:
+                if client.is_connected():  # 重连之前先断开连接
+                    client.disconnect()
                 client.connect(emqx_ip, 1883, 60)
                 time.sleep(10)
                 if not client.is_connected():  # 如果连接失败则需要reinit
@@ -69,4 +71,4 @@ def run():
                 cur_emqx_ip = emqx_ip
             except Exception as e:
                 print('connect failed:', e)
-        time.sleep(15)
+        time.sleep(120)

@@ -90,9 +90,7 @@ docker_client = docker.from_env()
 def push_upstream_once():
     containers = docker_client.containers.list()
     map_of_docker = get_map_of_docker(containers)  # {(name, port): tags}
-    print(map_of_docker)
     set_of_consul = get_set_of_consul()  # {(service_id, port)}
-    print(set_of_consul)
     for key, tags in map_of_docker.items():  # key => [name, port]
         name, port = key
         if (f'{hostname}-{name}', port) not in set_of_consul:
