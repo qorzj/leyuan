@@ -7,6 +7,9 @@ import docker
 from docker.models.containers import Container
 
 
+hostname = socket.gethostname()
+
+
 def is_ly_name(name: str):
     if name.count('-') < 3:  # format JOB_STAGE-GROUP-APP_NAME-INDEX only
         return False
@@ -19,6 +22,7 @@ def get_map_of_docker(containers: List[Container]):
     for container in containers:
         port80 = port8080 = port = 0  # type: int
         name = container.name  # type: str
+        container_id = f'{hostname}-{name}'
         if is_ly_name(name):
             tags = ['ly', 'docker']
         elif name == 'emqx':
@@ -35,9 +39,9 @@ def get_map_of_docker(containers: List[Container]):
             else:
                 port = max(port, int(outer_ports[0]['HostPort']))
         if port80 or port8080:
-            ret[name, port80 or port8080] = tags
+            ret[container_id, port80 or port8080] = tags
         elif port:
-            ret[name, port] = tags
+            ret[container_id, port] = tags
     return ret
 
 
@@ -70,12 +74,13 @@ def register(name, port, tags):
             "timeout": "1s"
         }
     }
+    print(f'register: {hostname}-{name}')
     url = 'http://127.0.0.1:8500/v1/agent/service/register'
     requests.put(url, json=data)
 
 
 def deregister(name):
-    hostname = socket.gethostname()
+    print(f'deregister: {hostname}-{name}')
     url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{hostname}-{name}'
     requests.put(url)
 
