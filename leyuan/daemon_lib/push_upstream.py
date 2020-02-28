@@ -22,7 +22,6 @@ def get_map_of_docker(containers: List[Container]):
     for container in containers:
         port80 = port8080 = port = 0  # type: int
         name = container.name  # type: str
-        container_id = f'{hostname}-{name}'
         if is_ly_name(name):
             tags = ['ly', 'docker']
         elif name == 'emqx':
@@ -39,9 +38,9 @@ def get_map_of_docker(containers: List[Container]):
             else:
                 port = max(port, int(outer_ports[0]['HostPort']))
         if port80 or port8080:
-            ret[container_id, port80 or port8080] = tags
+            ret[name, port80 or port8080] = tags
         elif port:
-            ret[container_id, port] = tags
+            ret[name, port] = tags
     return ret
 
 
