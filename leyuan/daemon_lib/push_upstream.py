@@ -22,6 +22,8 @@ def get_map_of_docker(containers: List[Container]):
     for container in containers:
         port80 = port8080 = port = 0  # type: int
         name = container.name  # type: str
+        if name.startswith(hostname + '-'):
+            name = name[len(hostname) + 1:]
         if is_ly_name(name):
             tags = ['ly', 'docker']
         elif name == 'emqx':
@@ -90,6 +92,7 @@ docker_client = docker.from_env()
 def push_upstream_once():
     containers = docker_client.containers.list()
     map_of_docker = get_map_of_docker(containers)
+    print(map_of_docker)
     set_of_consul = get_set_of_consul()
     for key, tags in map_of_docker.items():
         if key not in set_of_consul:
