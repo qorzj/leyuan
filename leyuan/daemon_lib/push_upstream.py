@@ -68,7 +68,7 @@ def register(name, port, tags):
             "Warning": 1
         },
         "check": {
-            "tcp": "localhost:%d" % port,
+            "http": "http://localhost:%d" % port,
             "interval": "10s",
             "timeout": "1s"
         }
