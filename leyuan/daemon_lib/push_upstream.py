@@ -78,9 +78,9 @@ def register(name, port, tags):
     requests.put(url, json=data)
 
 
-def deregister(name):
-    print(f'deregister: {hostname}-{name}')
-    url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{hostname}-{name}'
+def deregister(service_id):
+    print(f'deregister: {service_id}')
+    url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{service_id}'
     requests.put(url)
 
 
