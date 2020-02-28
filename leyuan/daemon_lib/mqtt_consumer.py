@@ -50,6 +50,7 @@ def run():
     client.loop_start()  # 启动监听线程
     while True:
         emqx_ip = get_leader_emqx()
+        print(f'cur_emqx_ip={cur_emqx_ip} emqx_ip={emqx_ip}')
         if cur_emqx_ip != emqx_ip:
             print('get leader emqx_ip: ' + emqx_ip)
             try:
@@ -68,4 +69,4 @@ def run():
                 cur_emqx_ip = emqx_ip
             except Exception as e:
                 print('connect failed:', e)
-        time.sleep(30)
+        time.sleep(15)
