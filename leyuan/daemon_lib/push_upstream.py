@@ -51,7 +51,7 @@ def get_set_of_consul():
     services = json.loads(requests.get('http://127.0.0.1:8500/v1/agent/services').text).values()
     for service in services:
         if 'docker' in service['Tags']:
-            ret.add((service['ID'], service['Port']))
+            ret.add((service['Service'], service['Port']))
     return ret
 
 
@@ -93,8 +93,9 @@ def push_upstream_once():
     containers = docker_client.containers.list()
     map_of_docker = get_map_of_docker(containers)
     print(map_of_docker)
-    set_of_consul = get_set_of_consul()
-    for key, tags in map_of_docker.items():
+    set_of_consul = get_set_of_consul()  # {(name, port)}
+    print(set_of_consul)
+    for key, tags in map_of_docker.items():  # key => [name, port]
         if key not in set_of_consul:
             register(key[0], key[1], tags)
 
