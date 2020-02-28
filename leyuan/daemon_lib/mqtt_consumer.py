@@ -8,9 +8,6 @@ from leyuan.daemon_lib.block_callback import do_block_once
 from leyuan.daemon_lib.exec_callback import do_exec_once
 
 
-client = None
-
-
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     if not not_ready('nginx'):
@@ -43,30 +40,32 @@ def on_disconnect(client, userdata, rc):
     print('Disconnected with result code ' + str(rc))
 
 
-def connect():
-    global client
-    emqx_ip = get_leader_emqx()
-    print('get leader emqx_ip: ' + emqx_ip)
-    if client and emqx_ip:
-        client.connect(emqx_ip, 1883, 60)
-        print('connected')
-
-
-def reconnect():
-    global client
-    while not time.sleep(30):
-        if client and not client.is_connected():
-            print('no connected, try to re-connect...')
-            connect()
-
-
 def run():
-    global client
+    cur_emqx_ip = ''
     client_id = socket.gethostname()
     client = mqtt.Client(client_id=client_id)
     client.on_connect = on_connect
     client.on_message = on_message
     client.on_disconnect = on_disconnect
-    connect()
-    threading.Thread(target=reconnect).start()
-    client.loop_forever()
+    client.loop_start()  # 启动监听线程
+    while True:
+        emqx_ip = get_leader_emqx()
+        if cur_emqx_ip != emqx_ip:
+            print('get leader emqx_ip: ' + emqx_ip)
+            try:
+                client.connect(emqx_ip, 1883, 60)
+                time.sleep(10)
+                if not client.is_connected():  # 如果连接失败则需要reinit
+                    client.disconnect()
+                    client.reinitialise(client_id=client_id)
+                    client.on_connect = on_connect
+                    client.on_message = on_message
+                    client.on_disconnect = on_disconnect
+                    print('reinit done')
+                    client.connect(emqx_ip, 1883, 60)
+                    time.sleep(10)
+                    print('connected:', client.is_connected())
+                cur_emqx_ip = emqx_ip
+            except Exception as e:
+                print('connect failed:', e)
+        time.sleep(30)
