@@ -22,8 +22,6 @@ def get_map_of_docker(containers: List[Container]):
     for container in containers:
         port80 = port8080 = port = 0  # type: int
         name = container.name  # type: str
-        if name.startswith(hostname + '-'):
-            name = name[len(hostname) + 1:]
         if is_ly_name(name):
             tags = ['ly', 'docker']
         elif name == 'emqx':
@@ -51,7 +49,7 @@ def get_set_of_consul():
     services = json.loads(requests.get('http://127.0.0.1:8500/v1/agent/services').text).values()
     for service in services:
         if 'docker' in service['Tags']:
-            ret.add((service['Service'], service['Port']))
+            ret.add((service['ID'], service['Port']))
     return ret
 
 
@@ -91,14 +89,18 @@ docker_client = docker.from_env()
 
 def push_upstream_once():
     containers = docker_client.containers.list()
-    map_of_docker = get_map_of_docker(containers)
+    map_of_docker = get_map_of_docker(containers)  # {(name, port): tags}
     print(map_of_docker)
-    set_of_consul = get_set_of_consul()  # {(name, port)}
+    set_of_consul = get_set_of_consul()  # {(service_id, port)}
     print(set_of_consul)
     for key, tags in map_of_docker.items():  # key => [name, port]
-        if key not in set_of_consul:
-            register(key[0], key[1], tags)
+        name, port = key
+        if (f'{hostname}-{name}', port) not in set_of_consul:
+            register(name, port, tags)
 
     for key in set_of_consul:
-        if key not in map_of_docker:
-            deregister(key[0])
+        prefix = hostname + '-'
+        service_id, port = key
+        if not service_id.startswith(prefix) \
+                or (service_id[len(prefix):], port) not in map_of_docker:
+            deregister(service_id)
