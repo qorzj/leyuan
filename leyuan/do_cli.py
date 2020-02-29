@@ -79,5 +79,5 @@ def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='18
         if total_passing == expect_int:
             print('succeed in %d seconds.' % int(time.time() - start_at))
             return
-    print('timeout exceed! (service count: %d)' % total_passing)
+    print('timeout exceed! service count: %d' % total_passing)
     exit(1)
