@@ -70,6 +70,7 @@ def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='18
     client_id = socket.gethostname()
     pub_exec_message(client_id, nodes, cmd)
     start_at = time.time()
+    total_passing = -1
     while time.time() - start_at < timeout_int:
         time.sleep(3)
         url = 'http://127.0.0.1:8500/v1/health/checks/' + service
@@ -78,5 +79,5 @@ def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='18
         if total_passing == expect_int:
             print('succeed in %d seconds.' % int(time.time() - start_at))
             return
-    print('timeout exceed!')
+    print('timeout exceed! (service count: %d)' % total_passing)
     exit(1)
