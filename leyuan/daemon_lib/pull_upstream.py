@@ -15,7 +15,6 @@ def do_pull_upstream_once():
         block_dict = json.loads(open(block_filename).read())
     except:
         block_dict = {}
-    new_block_dict: Dict[str, int] = {}
 
     upstream_dict: Dict[str, List[str]] = {}  # {"app-doc-admin": ["192.168.0.105:10988", ...]], "app-momentum-h5": ["192.168.0.105:29364", ...], ...}
     nodeMaps = json.loads(requests.get('http://127.0.0.1:8500/v1/catalog/nodes').text)
@@ -28,7 +27,6 @@ def do_pull_upstream_once():
             if 'ly' in serviceItem['Tags'] and serviceItem.get('Port'):
                 service_name = serviceItem['Service'].rsplit('-', 1)[0]
                 if f'{service_name}|{node_name}' in block_dict:  # blocked
-                    new_block_dict[f'{service_name}|{node_name}'] = 1  # still blocked
                     continue
                 service_port = serviceItem['Port']
                 upstream_dict.setdefault(service_name, [])
@@ -53,8 +51,3 @@ def do_pull_upstream_once():
                 f.write('}\n')
 
         os.system('%s -s reload' % NGINX_BIN)
-
-    if new_block_dict != block_dict:
-        with open(block_filename, 'w') as f:
-            f.write(json.dumps(new_block_dict))
-

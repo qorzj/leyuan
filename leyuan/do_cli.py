@@ -31,7 +31,7 @@ def pub_exec_message(client_id, node_names: str, cmd: str):
 def do_block(*, service: str, nodes: str):
     """
     使nginx屏蔽即将下线的服务
-    --service=?    服务名称
+    --service=?    服务名称，例如：stage-project-api
     --nodes=?      节点列表（逗号分割）
     """
     assert service, '服务名称不能为空'
@@ -43,7 +43,7 @@ def do_block(*, service: str, nodes: str):
 def do_unblock(*, service: str, nodes: str):
     """
     使nginx取消屏蔽服务
-    --service=?    服务名称
+    --service=?    服务名称，例如：stage-project-api
     --nodes=?      节点列表（逗号分割）
     """
     assert service, '服务名称不能为空'
@@ -55,7 +55,7 @@ def do_unblock(*, service: str, nodes: str):
 def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='180'):
     """
     通知nodes节点执行命令
-    --service=?     服务名称
+    --service=?     服务名称，例如：stage-project-api-1
     --nodes=?       节点列表（逗号分隔）
     --cmd=?         需要执行的命令
     --expect=?      当且仅当多少服务在线后，才成功退出
