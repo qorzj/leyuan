@@ -22,9 +22,11 @@ def get_map_of_docker(containers: List[Container]):
     for container in containers:
         port80 = port8080 = port = 0  # type: int
         name = container.name  # type: str
+        if name.count('-') == 2:  # JOB_STAGE-GROUP-APP_NAME set INDEX=0
+            name += '-0'
         if is_ly_name(name):
             tags = ['ly', 'docker']
-        elif name == 'emqx':
+        elif name == 'ly-emqx':
             tags = ['emqx', 'docker']
         else:
             tags = ['docker']

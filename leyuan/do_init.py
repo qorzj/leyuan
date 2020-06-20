@@ -30,7 +30,7 @@ def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
         '  -config-dir=/etc/consul.d &'
     )
 
-    assert_exe('docker run -d --name emqx -p 1883:1883 -p 8883:8883 -p 18083:18083 -p 33369:8080 --restart always emqx/emqx')
+    assert_exe('docker run -d --name ly-emqx -p 1883:1883 -p 8883:8883 -p 18083:18083 -p 33369:8080 --restart always emqx/emqx')
 
 
 def do_init_client(*, join_ip: str=''):

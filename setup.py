@@ -14,7 +14,7 @@ Setup
 
 Links
 -----
-* `README <https://github.com/qorzj/lesscli>`_
+* `README <https://github.com/qorzj/leyuan>`_
 
 """
 
