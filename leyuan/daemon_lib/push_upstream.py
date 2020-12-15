@@ -75,7 +75,10 @@ def register(name, port, tags):
         }
     }
     if 'ly' in tags:
-        data['check']['http'] = "http://localhost:%d" % port
+        if 'mrcs-api' in name:
+            data['check']['http'] = "http://localhost:%d/api" % port
+        else:
+            data['check']['http'] = "http://localhost:%d" % port
     else:
         data['check']['tcp'] = "localhost:%d" % port
     print(f'register: {hostname}-{name}')
