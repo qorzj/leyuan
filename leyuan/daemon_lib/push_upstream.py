@@ -1,66 +1,39 @@
-from typing import List
+from typing import List, Tuple
 import json
 import socket
 import requests
 import re
+import time
 import docker
 from docker.models.containers import Container
 
 
 hostname = socket.gethostname()
+docker_client = docker.from_env()
 
 
-def is_ly_name(name: str):
-    if name.count('-') < 3:  # format JOB_STAGE-GROUP-APP_NAME-INDEX only
-        return False
-    segs = name.split('-')
-    return re.match('^[0-9]+$', segs[-1]) is not None
+def get_dns_of_local_docker():
+    try:
+        containers = docker_client.containers.list()
+        ret = {}
+        for container in containers:
+            port_dict = {}
+            for inner_port_str, outer_ports in container.ports.items():
+                # inner_port_str例如：'8080/tcp'
+                outer_port = int(outer_ports[0]['HostPort'])
+                inner_port = int(re.findall(r'\d+', inner_port_str)[0])
+                port_dict[inner_port] = outer_port
+            ret[container.name] = port_dict
+        return ret
+    except:
+        return {}
 
 
-def get_map_of_docker(containers: List[Container]):
-    ret = {}
-    for container in containers:
-        port80 = port8080 = port = 0  # type: int
-        name = container.name  # type: str
-        if name.count('-') == 2:  # JOB_STAGE-GROUP-APP_NAME set INDEX=0
-            name += '-0'
-        if is_ly_name(name):
-            tags = ['ly', 'docker']
-        elif name == 'ly-emqx':
-            tags = ['emqx', 'docker']
-        else:
-            tags = ['docker']
-        for inner_port, outer_ports in container.ports.items():
-            if not outer_ports:
-                continue
-            if inner_port == '80/tcp':
-                port80 = int(outer_ports[0]['HostPort'])
-            elif inner_port == '8080/tcp':
-                port8080 = int(outer_ports[0]['HostPort'])
-            else:
-                port = max(port, int(outer_ports[0]['HostPort']))
-        if port80 or port8080:
-            ret[name, port80 or port8080] = tags
-        elif port:
-            ret[name, port] = tags
-    return ret
-
-
-def get_set_of_consul():
-    ret = set()
-    services = json.loads(requests.get('http://127.0.0.1:8500/v1/agent/services').text).values()
-    for service in services:
-        if 'docker' in service['Tags']:
-            ret.add((service['ID'], service['Port']))
-    return ret
-
-
-def register(name, port, tags):
-    hostname = socket.gethostname()
+def register(name, port, check_type, check_uri):
     data = {
         "ID": f'{hostname}-{name}',
         "Name": name,
-        "Tags": tags,
+        "Tags": ['ly'],
         "Address": "",
         "Port": port,
         "Meta": {},
@@ -74,39 +47,33 @@ def register(name, port, tags):
             "timeout": "1s"
         }
     }
-    if 'ly' in tags:
-        if 'mrcs-api' in name:
-            data['check']['http'] = "http://localhost:%d/api" % port
-        else:
-            data['check']['http'] = "http://localhost:%d" % port
-    else:
-        data['check']['tcp'] = "localhost:%d" % port
+    # check_type取值: http | tcp
+    # check_uri取值: http://localhost:41153/api 或 localhost:6379
+    data['check'][check_type] = check_uri
     print(f'register: {hostname}-{name}')
     url = 'http://127.0.0.1:8500/v1/agent/service/register'
     requests.put(url, json=data)
 
 
-def deregister(service_id):
+def deregister(name):
+    service_id = f'{hostname}-{name}'
     print(f'deregister: {service_id}')
     url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{service_id}'
     requests.put(url)
 
 
-docker_client = docker.from_env()
-
-
-def push_upstream_once():
-    containers = docker_client.containers.list()
-    map_of_docker = get_map_of_docker(containers)  # {(name, port): tags}
-    set_of_consul = get_set_of_consul()  # {(service_id, port)}
-    for key, tags in map_of_docker.items():  # key => [name, port]
-        name, port = key
-        if (f'{hostname}-{name}', port) not in set_of_consul:
-            register(name, port, tags)
-
-    for key in set_of_consul:
-        prefix = hostname + '-'
-        service_id, port = key
-        if not service_id.startswith(prefix) \
-                or (service_id[len(prefix):], port) not in map_of_docker:
-            deregister(service_id)
+def wait_consul_passing(service: str, timeout: int, expect: int) -> Tuple[int, int]:
+    """
+    等待consul的service数量达到expect，最多等待timeout秒。
+    返回: (最终状态为passing的节点数, 最终等待秒数)
+    """
+    start_at = time.time()
+    total_passing = -1
+    while time.time() - start_at < timeout:
+        time.sleep(3)
+        url = 'http://127.0.0.1:8500/v1/health/checks/' + service
+        healthList = json.loads(requests.get(url).text)
+        total_passing = sum(1 for x in healthList if x['Status'] == 'passing')
+        if total_passing == expect:
+            break
+    return total_passing, int(time.time() - start_at)

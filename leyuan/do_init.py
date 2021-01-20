@@ -4,7 +4,7 @@ from leyuan.utils import exe, not_ready, assert_exe
 
 def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
     """
-    安装server环境(consul, emqx)
+    安装server环境(consul)
       --server_count=?    集群中server的总数，默认为1，推荐为3
       --join_ip=?         另一个server的内网IP，第一个server不用设置
       --is_first          是否第一个server
@@ -30,8 +30,6 @@ def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
         '  -config-dir=/etc/consul.d &'
     )
 
-    assert_exe('docker run -d --name ly-emqx -p 1883:1883 -p 8883:8883 -p 18083:18083 -p 33369:8080 --restart always emqx/emqx')
-
 
 def do_init_client(*, join_ip: str=''):
     """
@@ -55,6 +53,6 @@ def do_init_client(*, join_ip: str=''):
     )
 
 
-app = Application('初始化consul和emqx')\
+app = Application('初始化consul')\
     .add('server', do_init_server)\
     .add('client', do_init_client)

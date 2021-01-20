@@ -1,14 +1,14 @@
 from lesscli import Application
-from leyuan import do_init, do_cli, do_daemon
+from leyuan import do_init, do_cli
 
 
 def main():
     Application('leyuan集群管理工具') \
         .add('init', do_init.app) \
-        .add('block', do_cli.do_block) \
-        .add('unblock', do_cli.do_unblock) \
-        .add('exec', do_cli.do_exec) \
-        .add('daemon', do_daemon.do_daemon) \
+        .add('register', do_cli.do_register) \
+        .add('deregister', do_cli.do_deregister) \
+        .add('upstream', do_cli.do_upstream) \
+        .add('wait', do_cli.do_wait) \
         .run()
 
 

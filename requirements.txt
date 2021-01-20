@@ -1,4 +1,3 @@
 lesscli
 requests
 docker
-paho-mqtt

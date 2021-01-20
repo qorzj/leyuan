@@ -1,83 +1,51 @@
-import json
-import requests
-import socket
-import time
-import paho.mqtt.client as mqtt
-from leyuan.consul_lib.catalog import get_leader_emqx
+import re
+from leyuan.daemon_lib.push_upstream import get_dns_of_local_docker, register, deregister, wait_consul_passing
+from leyuan.daemon_lib.pull_upstream import do_pull_upstream_once
 
 
-def pub_block_message(client_id, title, service_name, node_names: str):
-    client = mqtt.Client(client_id=client_id + '-pub')
-    emqx_ip = get_leader_emqx()
-    print('get leader emqx_ip: ' + emqx_ip)
-    assert emqx_ip, emqx_ip
-    client.connect(emqx_ip, 1883, 60)
-    payload = f'{service_name}|||{node_names}'
-    ret = client.publish(f'nginx/{title}', payload, qos=2)
-    print(ret)
+def do_register(*, service: str, check: str):
+    assert service, 'service不能为空'
+    assert check.count('://', 1), 'check必须包含协议，例如 http://'
+    protocol, check = check.split('://', 1)
+    check_type = 'http' if protocol in ['http', 'https'] else protocol
+    protocol_head = f'{protocol}://' if check_type == 'http' else ''
+    url_segs = check.split('/', 1)
+    host, path = (url_segs[0], '') if len(url_segs) == 1 else (url_segs[0], '/' + url_segs[1])
+    assert host, "check的域名部分不能为空"
+    if ':' in host:
+        port = int(host.split(':', 1)[1])
+    elif protocol == 'https':
+        port = 443
+    elif protocol == 'http':
+        port = 80
+    else:
+        raise ValueError('check必须包含端口，例如 tcp://127.0.0.1:3306')
+    map_of_docker = get_dns_of_local_docker()
+    if re.match(r'^[0-9.:]+$', host):
+        check_uri = f'{protocol_head}{host}{path}'
+    else:
+        assert service in map_of_docker, f'docker未运行容器{service}'
+        outer_port = map_of_docker[service].get(port)
+        assert outer_port, f'docker容器{service}需暴露{port}端口'
+        check_uri = f'{protocol_head}127.0.0.1:{outer_port}{path}'
+    register(service, port, check_type, check_uri)
 
 
-def pub_exec_message(client_id, node_names: str, cmd: str):
-    client = mqtt.Client(client_id=client_id + '-pub')
-    emqx_ip = get_leader_emqx()
-    print('get leader emqx_ip: ' + emqx_ip)
-    assert emqx_ip, emqx_ip
-    client.connect(emqx_ip, 1883, 60)
-    payload = f'{node_names}|||{cmd}'
-    ret = client.publish('docker/exec', payload, qos=2)
-    print(ret)
+def do_deregister(*, service: str):
+    assert service, 'service不能为空'
+    deregister(service)
 
 
-def do_block(*, service: str, nodes: str):
-    """
-    使nginx屏蔽即将下线的服务
-    --service=?    服务名称，例如：stage-project-api
-    --nodes=?      节点列表（逗号分割）
-    """
-    assert service, '服务名称不能为空'
-    assert nodes, '节点列表不能为空'
-    client_id = socket.gethostname()
-    pub_block_message(client_id, 'block', service, nodes)
-
-
-def do_unblock(*, service: str, nodes: str):
-    """
-    使nginx取消屏蔽服务
-    --service=?    服务名称，例如：stage-project-api
-    --nodes=?      节点列表（逗号分割）
-    """
-    assert service, '服务名称不能为空'
-    assert nodes, '节点列表不能为空'
-    client_id = socket.gethostname()
-    pub_block_message(client_id, 'unblock', service, nodes)
-
-
-def do_exec(*, service: str, nodes: str, cmd: str, expect: str, timeout: str='180'):
-    """
-    通知nodes节点执行命令
-    --service=?     服务名称，例如：stage-project-api-1
-    --nodes=?       节点列表（逗号分隔）
-    --cmd=?         需要执行的命令
-    --expect=?      当且仅当多少服务在线后，才成功退出
-    --timeout=?     超时未成功退出，则失败（默认:180，单位:秒）
-    """
-    assert service, '服务名称不能为空'
-    assert nodes, '节点列表不能为空'
-    assert cmd, '执行命令不能为空'
-    assert expect, 'expect不能为空'
-    expect_int = int(expect)
+def do_wait(*, service: str, timeout: str='60', expect: str='1'):
+    assert service, 'service不能为空'
     timeout_int = int(timeout)
-    client_id = socket.gethostname()
-    pub_exec_message(client_id, nodes, cmd)
-    start_at = time.time()
-    total_passing = -1
-    while time.time() - start_at < timeout_int:
-        time.sleep(3)
-        url = 'http://127.0.0.1:8500/v1/health/checks/' + service
-        healthList = json.loads(requests.get(url).text)
-        total_passing = sum(1 for x in healthList if x['Status'] == 'passing')
-        if total_passing == expect_int:
-            print('succeed in %d seconds.' % int(time.time() - start_at))
-            return
-    print('timeout exceed! service count: %d' % total_passing)
-    exit(1)
+    expect_int = int(expect)
+    total_passing, total_second = wait_consul_passing(service, timeout_int, expect_int)
+    if total_passing == expect:
+        print(f'succeed in {total_second} seconds.')
+    else:
+        print(f'timeout exceed! total_passing={total_passing}')
+
+
+def do_upstream():
+    do_pull_upstream_once()
