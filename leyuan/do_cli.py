@@ -3,7 +3,7 @@ from leyuan.daemon_lib.push_upstream import get_dns_of_local_docker, register, d
 from leyuan.daemon_lib.pull_upstream import do_pull_upstream_once
 
 
-def do_register(*, service: str, check: str):
+def do_register(*, service: str='', check: str=''):
     """
     注册service
       --service=?    服务名称
@@ -38,7 +38,7 @@ def do_register(*, service: str, check: str):
     register(service, port, check_type, check_uri)
 
 
-def do_deregister(*, service: str):
+def do_deregister(*, service: str=''):
     """
     取消注册service
       --service=?    服务名称
@@ -47,7 +47,7 @@ def do_deregister(*, service: str):
     deregister(service)
 
 
-def do_wait(*, service: str, timeout: str='60', expect: str='1'):
+def do_wait(*, service: str='', timeout: str='60', expect: str='1'):
     """
     等待服务可用
       --service=?    服务名称
