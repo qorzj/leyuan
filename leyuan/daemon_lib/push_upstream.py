@@ -5,7 +5,6 @@ import requests
 import re
 import time
 import docker
-from docker.models.containers import Container
 
 
 hostname = socket.gethostname()
@@ -20,6 +19,8 @@ def get_dns_of_local_docker():
             port_dict = {}
             for inner_port_str, outer_ports in container.ports.items():
                 # inner_port_str例如：'8080/tcp'
+                if not outer_ports or not inner_port_str:
+                    continue
                 outer_port = int(outer_ports[0]['HostPort'])
                 inner_port = int(re.findall(r'\d+', inner_port_str)[0])
                 port_dict[inner_port] = outer_port
