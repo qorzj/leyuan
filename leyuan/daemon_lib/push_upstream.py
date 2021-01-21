@@ -54,6 +54,7 @@ def register(name, port, check_type, check_uri):
     print(f'register: {hostname}-{name}')
     url = 'http://127.0.0.1:8500/v1/agent/service/register'
     requests.put(url, json=data)
+    print(json.dumps(data))
 
 
 def deregister(name):

@@ -20,7 +20,7 @@ def do_pull_upstream_once():
         node_ip = serviceMap['Node']['Address']
         for serviceItem in serviceMap['Services'].values():
             if 'ly' in serviceItem['Tags'] and serviceItem.get('Port'):
-                service_name = serviceItem['Service'].rsplit('-', 1)[0]
+                service_name = serviceItem['Service']
                 service_port = serviceItem['Port']
                 upstream_dict.setdefault(service_name, [])
                 upstream_dict[service_name].append('%s:%d' % (node_ip, service_port))
@@ -47,4 +47,4 @@ def do_pull_upstream_once():
             os.system(f'{NGINX_BIN} -s reload')
 
         with open('/opt/leyuan/consul/log/upstream.log', 'a') as f:
-            f.write(f'{datetime.datetime.now()} -> updated')
+            f.write(f'{datetime.datetime.now()} -> updated\n')
