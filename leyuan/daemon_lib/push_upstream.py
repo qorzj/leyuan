@@ -72,7 +72,7 @@ def wait_consul_passing(service: str, timeout: int, expect: int) -> Tuple[int, i
     start_at = time.time()
     total_passing = -1
     while time.time() - start_at < timeout:
-        time.sleep(3)
+        time.sleep(min(3, timeout))
         url = 'http://127.0.0.1:8500/v1/health/checks/' + service
         healthList = json.loads(requests.get(url).text)
         total_passing = sum(1 for x in healthList if x['Status'] == 'passing')

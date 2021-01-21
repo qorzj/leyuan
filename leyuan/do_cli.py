@@ -59,7 +59,7 @@ def do_wait(*, service: str='', timeout: str='60', expect: str='1'):
     timeout_int = int(timeout)
     expect_int = int(expect)
     total_passing, total_second = wait_consul_passing(service, timeout_int, expect_int)
-    if total_passing == expect:
+    if total_passing == expect_int:
         print(f'succeed in {total_second} seconds.')
     else:
         print(f'timeout exceed! total_passing={total_passing}')
