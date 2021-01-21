@@ -62,10 +62,14 @@ def register(name, instance, port, check_type, check_uri):
 
 
 def deregister(name):
+    """
+    按服务名注销所有service
+    如果name为'*'，则注销本服务器所有service（下线服务器时有用）
+    """
     url = 'http://127.0.0.1:8500/v1/catalog/node/' + hostname
     serviceMap = json.loads(requests.get(url).text)
     for serviceItem in serviceMap['Services'].values():
-        if serviceItem['Service'] == name:
+        if name == '*' or serviceItem['Service'] == name:
             service_id = serviceItem['ID']
             print(f'deregister: {service_id}')
             url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{service_id}'

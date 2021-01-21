@@ -41,13 +41,18 @@ def do_register(*, service: str='', check: str=''):
     register(service, instance, outer_port, check_type, check_uri)
 
 
-def do_deregister(*, service: str=''):
+def do_deregister(*, service: str='', all: str='x'):
     """
-    取消注册service
+    注销service
       --service=?    服务名称
+      --all          全部服务
     """
-    assert service, 'service不能为空'
-    deregister(service)
+    if all == 'x':
+        assert service, 'service不能为空'
+        deregister(service)
+    else:
+        assert not service, '--all和--service不能同时生效'
+        deregister('*')
 
 
 def do_wait(*, service: str='', timeout: str='60', expect: str='1', prune: str='x'):
@@ -56,7 +61,7 @@ def do_wait(*, service: str='', timeout: str='60', expect: str='1', prune: str='
       --service=?    服务名称
       --timeout=?    等待超时秒数，默认：60
       --expect=?     期望正常的示例个数，默认：1
-      --prune        如失败则取消注册
+      --prune        如失败则注销服务
     """
     assert service, 'service不能为空'
     timeout_int = int(timeout)
