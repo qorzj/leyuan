@@ -4,6 +4,11 @@ from leyuan.daemon_lib.pull_upstream import do_pull_upstream_once
 
 
 def do_register(*, service: str, check: str):
+    """
+    注册service
+      --service=?    服务名称
+      --check=?      健康检查链接。例如http://aa-bb-cc/，或tcp://ip:port
+    """
     assert service, 'service不能为空'
     assert check.count('://', 1), 'check必须包含协议，例如 http://'
     protocol, check = check.split('://', 1)
@@ -34,11 +39,21 @@ def do_register(*, service: str, check: str):
 
 
 def do_deregister(*, service: str):
+    """
+    取消注册service
+      --service=?    服务名称
+    """
     assert service, 'service不能为空'
     deregister(service)
 
 
 def do_wait(*, service: str, timeout: str='60', expect: str='1'):
+    """
+    等待服务可用
+      --service=?    服务名称
+      --timeout=?    等待超时秒数
+      --expect=?     期望正常的示例个数
+    """
     assert service, 'service不能为空'
     timeout_int = int(timeout)
     expect_int = int(expect)
