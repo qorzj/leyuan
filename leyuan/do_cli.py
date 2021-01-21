@@ -10,7 +10,7 @@ def do_register(*, service: str='', check: str=''):
       --check=?      健康检查链接。例如http://aa-bb-cc/，或tcp://ip:port
     """
     assert service, 'service不能为空'
-    assert check.count('://', 1), 'check必须包含协议，例如 http://'
+    assert check.count('://') == 1, 'check必须包含协议，例如 http://'
     protocol, check = check.split('://', 1)
     check_type = 'http' if protocol in ['http', 'https'] else protocol
     protocol_head = f'{protocol}://' if check_type == 'http' else ''
@@ -25,7 +25,7 @@ def do_register(*, service: str='', check: str=''):
     elif protocol == 'http':
         port = 80
     else:
-        raise ValueError('check必须包含端口，例如 tcp://127.0.0.1:3306')
+        raise AssertionError(f'check为{protocol}协议，必须包含端口，例如 tcp://127.0.0.1:3306')
     assert host, "check的域名部分不能为空"
     map_of_docker = get_dns_of_local_docker()
     if re.match(r'^[0-9.:]+$', host) or host == 'localhost':
