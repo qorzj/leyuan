@@ -52,8 +52,8 @@ def do_wait(*, service: str='', timeout: str='60', expect: str='1'):
     """
     等待服务可用
       --service=?    服务名称
-      --timeout=?    等待超时秒数
-      --expect=?     期望正常的示例个数
+      --timeout=?    等待超时秒数，默认：60
+      --expect=?     期望正常的示例个数，默认：1
     """
     assert service, 'service不能为空'
     timeout_int = int(timeout)
