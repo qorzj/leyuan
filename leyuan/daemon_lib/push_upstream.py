@@ -30,9 +30,13 @@ def get_dns_of_local_docker():
         return {}
 
 
-def register(name, port, check_type, check_uri):
+def register(name, instance, port, check_type, check_uri):
+    """
+    如果是docker容器，instance则为容器名
+    如果不是docker容器，instance则为"服务名-端口"
+    """
     data = {
-        "ID": f'{hostname}-{name}',
+        "ID": f'{hostname}-{instance}',
         "Name": name,
         "Tags": ['ly', check_type],
         "Address": "",
@@ -58,10 +62,14 @@ def register(name, port, check_type, check_uri):
 
 
 def deregister(name):
-    service_id = f'{hostname}-{name}'
-    print(f'deregister: {service_id}')
-    url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{service_id}'
-    requests.put(url)
+    url = 'http://127.0.0.1:8500/v1/catalog/node/' + hostname
+    serviceMap = json.loads(requests.get(url).text)
+    for serviceItem in serviceMap['Services'].values():
+        if serviceItem['Service'] == name:
+            service_id = serviceItem['ID']
+            print(f'deregister: {service_id}')
+            url = f'http://127.0.0.1:8500/v1/agent/service/deregister/{service_id}'
+            requests.put(url)
 
 
 def wait_consul_passing(service: str, timeout: int, expect: int) -> Tuple[int, int]:
@@ -75,7 +83,7 @@ def wait_consul_passing(service: str, timeout: int, expect: int) -> Tuple[int, i
         time.sleep(min(3, timeout))
         url = 'http://127.0.0.1:8500/v1/health/checks/' + service
         healthList = json.loads(requests.get(url).text)
-        total_passing = sum(1 for x in healthList if x['Status'] == 'passing')
+        total_passing = sum(1 for x in healthList if x['Status'] == 'passing' and x['Node'] == hostname)
         if total_passing == expect:
             break
     return total_passing, int(time.time() - start_at)

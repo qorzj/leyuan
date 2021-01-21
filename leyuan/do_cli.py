@@ -29,14 +29,16 @@ def do_register(*, service: str='', check: str=''):
     assert host, "check的域名部分不能为空"
     map_of_docker = get_dns_of_local_docker()
     if re.match(r'^[0-9.:]+$', host) or host == 'localhost':
+        instance = f'{service}-{port}'
         outer_port = port
         check_uri = f'{protocol_head}{host_part}{path}'
     else:
         assert host in map_of_docker, f'docker未运行容器{host}'
+        instance = host
         outer_port = map_of_docker[host].get(port)
         assert outer_port, f'docker容器{host}需暴露{port}端口'
         check_uri = f'{protocol_head}127.0.0.1:{outer_port}{path}'
-    register(service, outer_port, check_type, check_uri)
+    register(service, instance, outer_port, check_type, check_uri)
 
 
 def do_deregister(*, service: str=''):
@@ -48,12 +50,13 @@ def do_deregister(*, service: str=''):
     deregister(service)
 
 
-def do_wait(*, service: str='', timeout: str='60', expect: str='1'):
+def do_wait(*, service: str='', timeout: str='60', expect: str='1', prune: str='x'):
     """
     等待服务可用
       --service=?    服务名称
       --timeout=?    等待超时秒数，默认：60
       --expect=?     期望正常的示例个数，默认：1
+      --prune        如失败则取消注册
     """
     assert service, 'service不能为空'
     timeout_int = int(timeout)
@@ -63,6 +66,9 @@ def do_wait(*, service: str='', timeout: str='60', expect: str='1'):
         print(f'succeed in {total_second} seconds.')
     else:
         print(f'timeout exceed! total_passing={total_passing}')
+        if prune != 'x':
+            deregister(service)
+        exit(1)
 
 
 def do_upstream():
