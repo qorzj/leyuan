@@ -19,7 +19,7 @@ def do_pull_upstream_once():
         serviceMap = json.loads(requests.get(url).text)
         node_ip = serviceMap['Node']['Address']
         for serviceItem in serviceMap['Services'].values():
-            if 'ly' in serviceItem['Tags'] and serviceItem.get('Port'):
+            if 'ly' in serviceItem['Tags'] and 'http' in serviceItem['Tags'] and serviceItem.get('Port'):
                 service_name = serviceItem['Service']
                 service_port = serviceItem['Port']
                 upstream_dict.setdefault(service_name, [])

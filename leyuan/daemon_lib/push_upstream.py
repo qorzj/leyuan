@@ -34,7 +34,7 @@ def register(name, port, check_type, check_uri):
     data = {
         "ID": f'{hostname}-{name}',
         "Name": name,
-        "Tags": ['ly'],
+        "Tags": ['ly', check_type],
         "Address": "",
         "Port": port,
         "Meta": {},
