@@ -2,6 +2,7 @@ from typing import Dict, List
 import os
 import json
 import requests
+import datetime
 from leyuan.utils import not_ready
 
 
@@ -44,3 +45,6 @@ def do_pull_upstream_once():
 
         if not not_ready(NGINX_BIN):
             os.system(f'{NGINX_BIN} -s reload')
+
+        with open('/opt/leyuan/consul/log/upstream.log', 'a') as f:
+            f.write(f'{datetime.datetime.now()} -> updated')

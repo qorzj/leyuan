@@ -44,6 +44,7 @@ def do_init_client(*, join_ip: str=''):
 
     makedir('/opt/leyuan/upstream')
     makedir('/opt/leyuan/consul/data')
+    makedir('/opt/leyuan/consul/log')
     makedir('/opt/leyuan/consul.d')
     with open('/opt/leyuan/watch.sh', 'w') as f:
         f.write('ly upstream')
@@ -53,7 +54,7 @@ def do_init_client(*, join_ip: str=''):
         '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
         f'  -join={join_ip} ' +
         '  -data-dir=/opt/leyuan/consul/data ' +
-        '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/consul.log 2>&1 &'
+        '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/log/consul.log 2>&1 &'
     )
     assert_exe('consul watch -type=services -shell=/opt/leyuan/watch.sh')
 
