@@ -5,7 +5,7 @@ import requests
 from leyuan.utils import not_ready
 
 
-DEST = '/etc/nginx/conf.d'
+DEST = '/opt/leyuan/upstream'
 NGINX_BIN = 'nginx'
 
 

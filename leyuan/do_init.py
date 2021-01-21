@@ -1,5 +1,5 @@
 from lesscli import Application
-from leyuan.utils import exe, not_ready, assert_exe
+from leyuan.utils import makedir, not_ready, assert_exe
 
 
 def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
@@ -42,15 +42,20 @@ def do_init_client(*, join_ip: str=''):
         assert_exe('wget https://h5.parsec.com.cn/arms/consul -O /usr/bin/consul', '下载失败，请检查网络环境')
         assert_exe('chmod +x /usr/bin/consul')
 
-    assert_exe('mkdir -p /opt/consul/data')
-    assert_exe('mkdir -p /etc/consul.d')
+    makedir('/opt/leyuan/upstream')
+    makedir('/opt/leyuan/consul/data')
+    makedir('/opt/leyuan/consul.d')
+    with open('/opt/leyuan/watch.sh', 'w') as f:
+        f.write('ly upstream')
+    assert_exe('chmod +x /opt/leyuan/watch.sh')
     assert_exe(
         'nohup consul agent' +
         '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
         f'  -join={join_ip} ' +
-        '  -data-dir=/opt/consul/data ' +
-        '  -config-dir=/etc/consul.d &'
+        '  -data-dir=/opt/leyuan/consul/data ' +
+        '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/consul.log 2>&1 &'
     )
+    assert_exe('consul watch -type=services -shell=/opt/leyuan/watch.sh')
 
 
 app = Application('初始化consul')\

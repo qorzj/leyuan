@@ -10,23 +10,25 @@ def do_register(*, service: str, check: str):
     check_type = 'http' if protocol in ['http', 'https'] else protocol
     protocol_head = f'{protocol}://' if check_type == 'http' else ''
     url_segs = check.split('/', 1)
-    host, path = (url_segs[0], '') if len(url_segs) == 1 else (url_segs[0], '/' + url_segs[1])
-    assert host, "check的域名部分不能为空"
-    if ':' in host:
-        port = int(host.split(':', 1)[1])
+    host_part, path = (url_segs[0], '') if len(url_segs) == 1 else (url_segs[0], '/' + url_segs[1])
+    host = host_part
+    if ':' in host_part:
+        port = int(host_part.split(':', 1)[1])
+        host = host_part.split(':', 1)[0]
     elif protocol == 'https':
         port = 443
     elif protocol == 'http':
         port = 80
     else:
         raise ValueError('check必须包含端口，例如 tcp://127.0.0.1:3306')
+    assert host, "check的域名部分不能为空"
     map_of_docker = get_dns_of_local_docker()
-    if re.match(r'^[0-9.:]+$', host):
-        check_uri = f'{protocol_head}{host}{path}'
+    if re.match(r'^[0-9.:]+$', host) or host == 'localhost':
+        check_uri = f'{protocol_head}{host_part}{path}'
     else:
-        assert service in map_of_docker, f'docker未运行容器{service}'
-        outer_port = map_of_docker[service].get(port)
-        assert outer_port, f'docker容器{service}需暴露{port}端口'
+        assert host in map_of_docker, f'docker未运行容器{host}'
+        outer_port = map_of_docker[host].get(port)
+        assert outer_port, f'docker容器{host}需暴露{port}端口'
         check_uri = f'{protocol_head}127.0.0.1:{outer_port}{path}'
     register(service, port, check_type, check_uri)
 

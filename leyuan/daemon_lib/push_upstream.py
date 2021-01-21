@@ -43,7 +43,7 @@ def register(name, port, check_type, check_uri):
             "Warning": 1
         },
         "check": {
-            "interval": "10s",
+            "interval": "5s",
             "timeout": "1s"
         }
     }

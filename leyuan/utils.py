@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def exe(cmd: str):
@@ -15,3 +16,7 @@ def assert_exe(cmd: str, message=''):
     if not exe(cmd):
         print(message)
         exit(1)
+
+
+def makedir(real_path):
+    Path(real_path).mkdir(parents=True, exist_ok=True)
