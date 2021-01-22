@@ -8,11 +8,11 @@ import docker
 
 
 hostname = socket.gethostname()
-docker_client = docker.from_env()
 
 
 def get_dns_of_local_docker():
     try:
+        docker_client = docker.from_env()
         containers = docker_client.containers.list()
         ret = {}
         for container in containers:
