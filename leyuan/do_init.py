@@ -1,5 +1,5 @@
 from lesscli import Application
-from leyuan.utils import makedir, not_ready, assert_exe
+from leyuan.utils import makedir, not_ready, assert_exe, exe
 
 
 class ConsulAgentCtx:
@@ -20,7 +20,7 @@ class ConsulAgentCtx:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         assert_exe('sleep 3')
-        assert_exe('consul catalog nodes')
+        exe('consul catalog nodes')
         assert_exe('nohup consul watch -type=services /opt/leyuan/watch.sh >/opt/leyuan/consul/log/watch.log 2>&1 &')
 
 
