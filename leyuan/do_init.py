@@ -15,6 +15,7 @@ class ConsulAgentCtx:
         with open('/opt/leyuan/watch.sh', 'w') as f:
             f.write('ly upstream')
         assert_exe('chmod +x /opt/leyuan/watch.sh')
+        assert_exe('touch /opt/leyuan/upstream/upstream.list')
         assert_exe('rm -rf /opt/leyuan/consul.d/*')
         assert_exe('rm -rf /opt/leyuan/consul/data/*')
 
