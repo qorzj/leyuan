@@ -3,7 +3,7 @@
 leyuan
 ~~~~~~~~
 
-Leyuan is a cluster management tool.
+Leyuan is a consul based cluster management tool.
 
 Setup
 -----
@@ -33,7 +33,7 @@ class MyInstall(install):
 
 setup(
         name = 'leyuan',
-        version='0.0.2',
+        version='1.0.0',
         description='Leyuan Cluster Tool',
         long_description=__doc__,
         url='https://github.com/qorzj/leyuan',
