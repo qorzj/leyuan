@@ -33,7 +33,7 @@ class MyInstall(install):
 
 setup(
         name = 'leyuan',
-        version='1.0.0',
+        version='1.1.0',
         description='Leyuan Cluster Tool',
         long_description=__doc__,
         url='https://github.com/qorzj/leyuan',

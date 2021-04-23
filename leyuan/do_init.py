@@ -25,12 +25,13 @@ class ConsulAgentCtx:
         assert_exe('nohup consul watch -type=services /opt/leyuan/watch.sh >/opt/leyuan/consul/log/watch.log 2>&1 &')
 
 
-def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
+def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x', bind: str='eth0'):
     """
     安装server环境(consul)
       --server_count=?    集群中server的总数，默认为1，推荐为3
       --join_ip=?         另一个server的内网IP，第一个server不用设置
       --is_first          是否第一个server
+      --bind=?            本地网卡标识，默认为eth0
     """
     if is_first == 'x':
         assert join_ip, '非第一个server需要设置join_ip'
@@ -41,23 +42,24 @@ def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x'):
             'nohup consul agent' +
             '  -server ' +
             f'  -bootstrap-expect={server_count} ' +
-            '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
+            f'  -bind=\'{{ GetInterfaceIP "{bind}" }}\' ' +
             (f'  -join={join_ip} ' if join_ip else '') +
             '  -data-dir=/opt/leyuan/consul/data ' +
             '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/log/agent.log 2>&1 &'
         )
 
 
-def do_init_client(*, join_ip: str=''):
+def do_init_client(*, join_ip: str='', bind: str='eth0'):
     """
     安装client环境(consul)
       --join_ip=?         另一个server的内网IP
+      --bind=?            本地网卡标识，默认为eth0
     """
     assert join_ip, '需要设置join_ip'
     with ConsulAgentCtx():
         assert_exe(
             'nohup consul agent' +
-            '  -bind=\'{{ GetInterfaceIP "eth0" }}\' ' +
+            f'  -bind=\'{{ GetInterfaceIP "{bind}" }}\' ' +
             f'  -join={join_ip} ' +
             '  -data-dir=/opt/leyuan/consul/data ' +
             '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/log/agent.log 2>&1 &'
