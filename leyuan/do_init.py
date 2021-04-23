@@ -42,7 +42,7 @@ def do_init_server(*, server_count: int=1, join_ip: str='', is_first: str='x', b
             'nohup consul agent' +
             '  -server ' +
             f'  -bootstrap-expect={server_count} ' +
-            f'  -bind=\'{{ GetInterfaceIP "{bind}" }}\' ' +
+            '  -bind=\'{{ GetInterfaceIP "' + bind + '" }}\' ' +
             (f'  -join={join_ip} ' if join_ip else '') +
             '  -data-dir=/opt/leyuan/consul/data ' +
             '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/log/agent.log 2>&1 &'
@@ -59,7 +59,7 @@ def do_init_client(*, join_ip: str='', bind: str='eth0'):
     with ConsulAgentCtx():
         assert_exe(
             'nohup consul agent' +
-            f'  -bind=\'{{ GetInterfaceIP "{bind}" }}\' ' +
+            '  -bind=\'{{ GetInterfaceIP "' + bind + '" }}\' ' +
             f'  -join={join_ip} ' +
             '  -data-dir=/opt/leyuan/consul/data ' +
             '  -config-dir=/opt/leyuan/consul.d >/opt/leyuan/consul/log/agent.log 2>&1 &'
